@@ -26,3 +26,19 @@ Thumbs.db
 
 # Logs
 *.log
+
+
+# Credenciales sensibles
+credentials/
+*.json
+gee-service-account.json
+   
+# Entorno virtual
+venv/
+   
+# Variables de entorno
+.env
+   
+# Python
+__pycache__/
+*.pyc

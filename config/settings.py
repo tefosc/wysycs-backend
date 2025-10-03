@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings
 from functools import lru_cache
+from typing import Optional
 
 class Settings(BaseSettings):
     # App
@@ -13,8 +14,9 @@ class Settings(BaseSettings):
     # NASA (SIN valor por defecto - REQUERIDO)
     nasa_firms_api_key: str
     
-    # Google Earth Engine (Opcional)
-    google_credentials: str = ""
+    # Google Earth Engine
+    gee_service_account: str = ""
+    gee_private_key_path: str = "credentials/gee-service-account.json"
     
     # Notificaciones (Opcionales)
     resend_api_key: str = ""
