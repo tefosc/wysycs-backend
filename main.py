@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from config.settings import get_settings
-from routes import forests, adoption
+from routes import forests, adoption, notifications
 from routes.fires import router as fires_router
 import logging
 
@@ -27,6 +27,7 @@ app.add_middleware(
 app.include_router(forests.router)
 app.include_router(adoption.router)
 app.include_router(fires_router)
+app.include_router(notifications.router, prefix="/api/v1", tags=["Notifications"])
 
 @app.get("/")
 def root():
