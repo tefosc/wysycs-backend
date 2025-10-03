@@ -3,7 +3,7 @@
 ## 🌐 URL Base de Producción
 
 ```
-https://web-production-7dae.up.railway.app/api/v1
+https://web-production-7dae.up.railway.app
 ```
 
 ## 📚 Documentación Interactiva
