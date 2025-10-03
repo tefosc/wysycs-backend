@@ -117,6 +117,15 @@ https://web-production-7dae.up.railway.app/docs
 }
 ```
 
+**🔥 Coordenadas de prueba con incendios reales:**
+
+```javascript
+lat=-8.3, lon=-75.6   → CRÍTICO (incendio a 3.07km)
+lat=-12.87, lon=-70.44 → Madre de Dios
+lat=-7.86, lon=-71.73  → Ucayali
+lat=-6.18, lon=-76.09  → San Martín
+```
+
 **Niveles de riesgo y colores para UI:**
 
 - CRÍTICO: `#ef4444` (rojo)
