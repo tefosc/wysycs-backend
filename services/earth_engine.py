@@ -8,11 +8,17 @@ class EarthEngineService:
     def __init__(self):
         """Inicializar Earth Engine con service account"""
         try:
-            # Cargar credenciales desde archivo JSON
-            credentials_path = 'credentials/gee-service-account.json'
+            # Intentar cargar desde variable de entorno primero (Railway)
+            gee_json = os.getenv('GEE_SERVICE_ACCOUNT_JSON')
             
-            with open(credentials_path, 'r') as f:
-                credentials_info = json.load(f)
+            if gee_json:
+                # Producción: Leer de variable de entorno
+                credentials_info = json.loads(gee_json)
+            else:
+                # Local: Leer desde archivo
+                credentials_path = 'credentials/gee-service-account.json'
+                with open(credentials_path, 'r') as f:
+                    credentials_info = json.load(f)
             
             credentials = ee.ServiceAccountCredentials(
                 email=credentials_info['client_email'],
