@@ -3,6 +3,7 @@ from pydantic import BaseModel, EmailStr
 from services.database import DatabaseService, supabase
 from services.notifier import notification_service
 from typing import Optional
+from services.earth_engine import earth_engine_service
 
 router = APIRouter(prefix="/api/v1", tags=["Adoption"])
 
@@ -57,15 +58,16 @@ def adopt_forest(request: AdoptionRequest):
             "email_sent": True,
             "points_earned": initial_points,
             "guardian_level": new_level
-        }
+        }   
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @router.get("/guardian/{email}")
 def get_guardian_info(email: str):
-    """Info del guardián"""
+    """Info del guardián con salud NASA de bosques adoptados"""
     forests = DatabaseService.get_guardian_forests(email)
     
     if not forests:
@@ -77,14 +79,46 @@ def get_guardian_info(email: str):
             "guardian_level": "Sembrador"
         }
     
+    # Agregar salud NASA a cada bosque adoptado
+    forests_with_nasa = []
+    for forest in forests:
+        try:
+            # Obtener salud NASA en tiempo real
+            health_data = earth_engine_service.get_forest_ndvi(
+                lat=forest['latitude'],
+                lon=forest['longitude']
+            )
+            
+            # Agregar health_nasa al bosque
+            forest['health_nasa'] = {
+                'ndvi_value': health_data['ndvi_value'],
+                'health_percentage': health_data['health_percentage'],
+                'status': health_data['status'],
+                'color': health_data['color'],
+                'is_real_data': health_data['is_real_data'],
+                'last_update': health_data['last_update']
+            }
+        except Exception as e:
+            print(f"⚠️ Error obteniendo salud NASA para bosque {forest.get('forest_id')}: {e}")
+            # Fallback si falla GEE
+            forest['health_nasa'] = {
+                'ndvi_value': None,
+                'health_percentage': forest.get('health', 50),
+                'status': 'Datos no disponibles',
+                'color': '#6b7280',
+                'is_real_data': False
+            }
+        
+        forests_with_nasa.append(forest)
+    
     # Calcular puntos totales
-    total_points = sum([f.get('points', 0) for f in forests])
+    total_points = sum([f.get('points', 0) for f in forests_with_nasa])
     
     return {
         "guardian_email": email,
-        "guardian_name": forests[0]['guardian_name'],
-        "adopted_forests": forests,
-        "total_forests": len(forests),
+        "guardian_name": forests_with_nasa[0]['guardian_name'],
+        "adopted_forests": forests_with_nasa,
+        "total_forests": len(forests_with_nasa),
         "total_points": total_points,
-        "guardian_level": forests[0].get('guardian_level', 'Sembrador')
+        "guardian_level": forests_with_nasa[0].get('guardian_level', 'Sembrador')
     }
