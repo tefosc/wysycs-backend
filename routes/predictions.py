@@ -146,3 +146,38 @@ def simulate_fire_impact(request: FireImpactRequest):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+# Agregar este import al inicio del archivo
+from services.fire_predictor import fire_predictor
+
+# Agregar este endpoint al FINAL del archivo
+@router.get("/fire/predict-spread")
+async def predict_fire_spread(
+    latitude: float = Query(..., description="Latitud del incendio"),
+    longitude: float = Query(..., description="Longitud del incendio"),
+    days_ahead: int = Query(3, ge=1, le=7, description="Días a predecir"),
+    wind_speed: float = Query(15, ge=0, le=100, description="Velocidad viento km/h"),
+    humidity: float = Query(30, ge=0, le=100, description="Humedad %"),
+    wind_direction: float = Query(90, ge=0, le=360, description="Dirección viento (grados)")
+):
+    """
+    Predice propagación de incendio usando modelo físico
+    
+    - **latitude**: Ubicación actual del incendio
+    - **longitude**: Ubicación actual del incendio  
+    - **days_ahead**: Días hacia adelante (1-7)
+    - **wind_speed**: Velocidad del viento en km/h
+    - **humidity**: Humedad relativa (%)
+    - **wind_direction**: Dirección del viento en grados (0=Norte, 90=Este, 180=Sur, 270=Oeste)
+    """
+    
+    prediction = await fire_predictor.predict_spread(
+        fire_lat=latitude,
+        fire_lon=longitude,
+        days_ahead=days_ahead,
+        wind_speed_kmh=wind_speed,
+        humidity_percent=humidity,
+        wind_direction_deg=wind_direction
+    )
+    
+    return prediction
