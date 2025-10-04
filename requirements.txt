@@ -69,7 +69,7 @@ python-dotenv==1.0.0
 python-gitlab==3.15.0
 python-multipart==0.0.6
 python-semantic-release==7.33.2
-python-telegram-bot==20.6
+# python-telegram-bot==20.6
 pytz==2025.2
 pywin32-ctypes==0.2.3
 PyYAML==6.0.3
