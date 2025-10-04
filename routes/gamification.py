@@ -10,7 +10,7 @@ LEVELS = {
     "Sembrador": {"min_points": 0, "max_points": 50, "emoji": "🌱"},
     "Protector": {"min_points": 51, "max_points": 150, "emoji": "🌳"},
     "Guardián": {"min_points": 151, "max_points": 300, "emoji": "🦅"},
-    "Líder Ancestral": {"min_points": 301, "max_points": float('inf'), "emoji": "🏆"}
+    "Líder Ancestral": {"min_points": 301, "max_points": 999999, "emoji": "🏆"}
 }
 
 def calculate_level(points: int) -> str:
