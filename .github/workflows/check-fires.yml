@@ -1,0 +1,20 @@
+name: Check Fires Cron Job
+
+on:
+    schedule:
+        - cron: "0 */2 * * *" # Cada 2 horas
+    workflow_dispatch: # Permite ejecución manual desde GitHub
+
+jobs:
+    check-fires:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Call Backend Cron Endpoint
+              run: |
+                  curl -X POST https://web-production-7dae.up.railway.app/cron/check-fires \
+                    -H "Content-Type: application/json" \
+                    -w "\nHTTP Status: %{http_code}\n"
+
+            - name: Log execution
+              run: echo "Cron ejecutado en $(date)"
