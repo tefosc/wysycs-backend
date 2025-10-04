@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from services.database import DatabaseService
-from services.earth_engine import EarthEngineService
+from services.earth_engine import earth_engine_service
 from typing import List, Dict
 from datetime import datetime
 
@@ -30,8 +30,7 @@ def get_forest_by_id(forest_id: str):
     
     # Obtener salud en tiempo real desde NASA
     try:
-        health_data = EarthEngineService.get_forest_health(
-            forest_id=forest_id,
+        health_data = earth_engine_service.get_forest_ndvi(
             lat=forest['latitude'],
             lon=forest['longitude']
         )
