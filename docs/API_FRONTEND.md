@@ -38,7 +38,9 @@ http://localhost:8000/api/v1
 GET /forests
 ```
 
-**Respuesta:**
+**Descripción:** Obtiene la lista completa de 10 bosques disponibles para adoptar.
+
+**Respuesta:** Array de objetos (sin datos NASA en tiempo real)
 
 ```json
 [
@@ -52,15 +54,37 @@ GET /forests
     "species_count": 342,
     "community": "Comunidad Kukama Kukamiria",
     "fun_facts": [
-      "🦜 Alberga al guacamayo rojo en peligro",
-      "💧 Filtra agua para el río Marañón",
-      "🌳 120,000 árboles de caoba y cedro"
-    ]
+      "🦜 Alberga al guacamayo rojo en peligro de extinción",
+      "💧 Filtra agua para 50,000 personas del río Marañón",
+      "🌳 Contiene 120,000 árboles de caoba y cedro"
+    ],
+    "created_at": "2025-10-02T03:02:24.344938"
+  },
+  {
+    "id": "2",
+    "name": "Selva Alta Cordillera Azul",
+    "latitude": -5.8,
+    "longitude": -76.5,
+    "health": 62,
+    "co2_capture": "12,100 toneladas/año",
+    "species_count": 287,
+    "community": "Comunidad Awajún",
+    "fun_facts": [
+      "🐆 Hogar del oso de anteojos andino",
+      "💧 Protege nacientes de 7 ríos",
+      "🌺 347 especies de orquídeas nativas"
+    ],
+    "created_at": "2025-10-02T03:02:24.344938"
   }
+  // ... 8 bosques más
 ]
 ```
 
-#### 2. Obtener bosque específico
+**Nota:** El campo `health` es un valor histórico de la base de datos. Para salud en tiempo real, usar el endpoint individual.
+
+---
+
+#### 2. Obtener bosque específico con salud NASA en tiempo real ⭐
 
 ```http
 GET /forests/{id}
@@ -70,7 +94,85 @@ GET /forests/{id}
 
 - `id` (path): ID del bosque (1-10)
 
+**Descripción:** Obtiene información completa del bosque + salud en tiempo real desde satélites NASA MODIS.
+
+**Respuesta:** Objeto único con datos NASA integrados
+
+```json
+{
+  "id": "1",
+  "name": "Bosque de Neblina Pacaya-Samiria",
+  "latitude": -4.5,
+  "longitude": -74.2,
+  "health": 45,
+  "co2_capture": "8,400 toneladas/año",
+  "species_count": 342,
+  "community": "Comunidad Kukama Kukamiria",
+  "fun_facts": [
+    "🦜 Alberga al guacamayo rojo en peligro de extinción",
+    "💧 Filtra agua para 50,000 personas del río Marañón",
+    "🌳 Contiene 120,000 árboles de caoba y cedro"
+  ],
+  "created_at": "2025-10-02T03:02:24.344938",
+  "health_nasa": {
+    "ndvi_value": 0.829,
+    "health_percentage": 95,
+    "status": "Saludable",
+    "color": "#10b981",
+    "source": "MODIS/061/MOD13Q1 (NASA)",
+    "is_real_data": true,
+    "last_update": "2025-10-04T17:11:04.268731"
+  }
+}
+```
+
+**Campos importantes:**
+
+| Campo                           | Descripción                                                   |
+| ------------------------------- | ------------------------------------------------------------- |
+| `health`                        | Valor histórico de base de datos (puede estar desactualizado) |
+| `health_nasa.health_percentage` | **Salud en tiempo real desde satélite NASA** ⭐               |
+| `health_nasa.ndvi_value`        | Índice de vegetación (0-1)                                    |
+| `health_nasa.status`            | Estado: Saludable / En riesgo / Deteriorado / Crítico         |
+| `health_nasa.color`             | Color hexadecimal para UI                                     |
+| `health_nasa.is_real_data`      | `true` = datos NASA, `false` = estimación (GEE falló)         |
+
+**Estados de salud y colores:**
+
+| Estado      | Salud  | Color    | Hex       |
+| ----------- | ------ | -------- | --------- |
+| Saludable   | ≥70%   | Verde    | `#10b981` |
+| En riesgo   | 50-69% | Amarillo | `#f59e0b` |
+| Deteriorado | 30-49% | Naranja  | `#f97316` |
+| Crítico     | <30%   | Rojo     | `#ef4444` |
+
+**Recomendación Frontend:**
+
+- Para listar bosques: usar `GET /forests`
+- Para mostrar detalles y salud actual: usar `GET /forests/{id}`
+- Siempre usar `health_nasa.health_percentage` para indicadores de salud
+- Ignorar el campo `health` (está desactualizado)
+
 ---
+
+**Ejemplo de integración React:**
+
+```javascript
+// Listar bosques
+const forests = await fetch(
+  "https://web-production-7dae.up.railway.app/api/v1/forests"
+).then((res) => res.json());
+
+// Obtener detalle con NASA
+const forestDetail = await fetch(
+  "https://web-production-7dae.up.railway.app/api/v1/forests/1"
+).then((res) => res.json());
+
+// Usar datos NASA
+const healthColor = forestDetail.health_nasa.color;
+const healthPercent = forestDetail.health_nasa.health_percentage;
+const isRealData = forestDetail.health_nasa.is_real_data;
+```
 
 ### 🤝 ADOPCIÓN (2 endpoints)
 
