@@ -53,7 +53,7 @@ class NotificationService:
             """
             
             params = {
-                "from": "WYSYCS <onboarding@resend.dev>",
+                "from": "WYSYCS <alertas@wysycs.health>",
                 "to": [guardian_email],
                 "subject": f"🌳 ¡Adoptaste {forest_name}!",
                 "html": html_content
@@ -115,7 +115,7 @@ class NotificationService:
             """
             
             params = {
-                "from": "WYSYCS <alertas@wysycs.dev>",
+                "from": "WYSYCS <alertas@wysycs.health>",
                 "to": [guardian_email],
                 "subject": f"🔥 ALERTA: Incendio cerca de {forest_name}",
                 "html": html_content
