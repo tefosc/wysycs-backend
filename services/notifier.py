@@ -28,21 +28,21 @@ class NotificationService:
             <body>
                 <div class="container">
                     <div class="header">
-                        <h1>🌳 ¡Felicidades {guardian_name}!</h1>
+                        <h1>🌳 Congratulations {guardian_name}!</h1>
                     </div>
                     <div class="content">
-                        <p>Has adoptado exitosamente:</p>
+                        <p>You have successfully adopted:</p>
                         <p class="forest-name">{forest_name}</p>
-                        
-                        <p>Como Guardián de este bosque, ahora recibirás:</p>
+
+                        <p>As a Guardian of this forest, you will now receive:</p>
                         <ul>
-                            <li>🔥 Alertas de incendios cercanos en tiempo real</li>
-                            <li>📊 Reportes de salud del bosque (NDVI)</li>
-                            <li>🏆 Puntos por cada día protegiendo el bosque</li>
+                            <li>🔥 Real-time alerts for nearby fires</li>
+                            <li>📊 Forest health reports (NDVI)</li>
+                            <li>🏆 Points for each day protecting the forest</li>
                         </ul>
-                        
-                        <p><strong>Tu misión:</strong> Proteger y monitorear este bosque amazónico.</p>
-                        
+
+                        <p><strong>Your mission:</strong> Protect and monitor this Amazonian forest.</p>
+
                         <p style="margin-top: 30px; color: #6b7280;">
                             What You See, You Can Save 💚
                         </p>
@@ -55,7 +55,7 @@ class NotificationService:
             params = {
                 "from": "WYSYCS <alertas@wysycs.health>",
                 "to": [guardian_email],
-                "subject": f"🌳 ¡Adoptaste {forest_name}!",
+                "subject": f"🌳 You adopted {forest_name}!",
                 "html": html_content
             }
             
@@ -87,26 +87,26 @@ class NotificationService:
             <body>
                 <div class="container">
                     <div class="header">
-                        <h1>🔥 ¡ALERTA DE INCENDIO!</h1>
+                        <h1>🔥 FIRE ALERT!</h1>
                     </div>
                     <div class="content">
-                        <p><strong>Tu bosque {forest_name} está en peligro.</strong></p>
-                        
+                        <p><strong>Your forest {forest_name} is in danger.</strong></p>
+
                         <div class="alert-box">
-                            <p>Incendio detectado a:</p>
+                            <p>Fire detected at:</p>
                             <p class="distance">{distance_km:.1f} km</p>
-                            <p style="color: #6b7280;">Datos NASA - Detección satelital</p>
+                            <p style="color: #6b7280;">NASA Data - Satellite Detection</p>
                         </div>
-                        
-                        <p><strong>Acciones recomendadas:</strong></p>
+
+                        <p><strong>Recommended actions:</strong></p>
                         <ul>
-                            <li>🚨 Alertar a autoridades locales</li>
-                            <li>👥 Verificar con la comunidad</li>
-                            <li>📞 Contactar bomberos si es necesario</li>
+                            <li>🚨 Alert local authorities</li>
+                            <li>👥 Check with the community</li>
+                            <li>📞 Contact firefighters if necessary</li>
                         </ul>
-                        
+
                         <p style="margin-top: 30px; color: #dc2626;">
-                            <strong>Actúa rápido. Cada minuto cuenta.</strong>
+                            <strong>Act fast. Every minute counts.</strong>
                         </p>
                     </div>
                 </div>
@@ -117,7 +117,7 @@ class NotificationService:
             params = {
                 "from": "WYSYCS <alertas@wysycs.health>",
                 "to": [guardian_email],
-                "subject": f"🔥 ALERTA: Incendio cerca de {forest_name}",
+                "subject": f"🔥 ALERT: Fire near {forest_name}",
                 "html": html_content
             }
             
