@@ -210,7 +210,6 @@ def update_guardian_points(email: str, points_to_add: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
 @router.get("/guardian/{email}/progress")
 def get_guardian_progress(email: str):
     """
@@ -223,20 +222,21 @@ def get_guardian_progress(email: str):
         Información de progreso y siguiente nivel
     """
     try:
-        # Obtener info del guardián
+        # Obtener TODAS las adopciones del guardián
         result = supabase.table('adopted_forests') \
             .select('*') \
             .eq('guardian_email', email) \
             .eq('is_active', True) \
-            .limit(1) \
             .execute()
         
         if not result.data:
             raise HTTPException(status_code=404, detail="Guardián no encontrado")
         
-        guardian = result.data[0]
-        current_points = guardian.get('points', 0)
-        current_level = guardian.get('guardian_level', 'Seedling')
+        # ✅ SUMAR puntos de todas las adopciones
+        total_points = sum([adoption.get('points', 0) for adoption in result.data])
+        
+        # ✅ RECALCULAR nivel basado en puntos totales
+        current_level = calculate_level(total_points)
         
         # Encontrar siguiente nivel
         levels_list = list(LEVELS.items())
@@ -244,8 +244,8 @@ def get_guardian_progress(email: str):
         
         if current_index < len(levels_list) - 1:
             next_level_name, next_level_config = levels_list[current_index + 1]
-            points_needed = next_level_config['min_points'] - current_points
-            progress_percentage = int((current_points / next_level_config['min_points']) * 100)
+            points_needed = next_level_config['min_points'] - total_points
+            progress_percentage = int((total_points / next_level_config['min_points']) * 100)
         else:
             next_level_name = "Maximum level reached"
             points_needed = 0
@@ -255,16 +255,16 @@ def get_guardian_progress(email: str):
         
         return {
             "guardian_email": email,
-            "guardian_name": guardian['guardian_name'],
+            "guardian_name": result.data[0]['guardian_name'],
             "current_level": {
                 "name": current_level,
                 "emoji": current_config['emoji'],
-                "points": current_points
+                "points": total_points  # ✅ Puntos totales, no de una adopción
             },
             "next_level": {
                 "name": next_level_name,
-                "points_needed": points_needed,
-                "progress_percentage": progress_percentage
+                "points_needed": max(0, points_needed),  # No negativos
+                "progress_percentage": min(100, progress_percentage)  # Max 100%
             },
             "forests_adopted": len(result.data)
         }
