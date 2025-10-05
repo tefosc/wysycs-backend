@@ -1,183 +1,193 @@
-from fastapi import APIRouter, HTTPException, Query
-from pydantic import BaseModel
-from typing import List
-from services.predictor import predictor_service
-from services.earth_engine import earth_engine_service
-from services.database import DatabaseService
+from fastapi import APIRouter, Query
+from typing import Optional
+import random
 
-router = APIRouter(prefix="/api/v1", tags=["Predictions"])
+router = APIRouter()
 
-@router.get("/forest/{forest_id}/prediction")
-def predict_forest_future(
-    forest_id: str,
-    days_ahead: int = Query(default=90, ge=1, le=365, description="Días a predecir (1-365)")
-):
+def get_weather_params_by_location(latitude: float, longitude: float):
     """
-    Predecir salud futura del bosque usando Machine Learning (Prophet)
-    
-    Args:
-        forest_id: ID del bosque
-        days_ahead: Días hacia adelante para predecir
-    
-    Returns:
-        Predicciones con tendencia y evaluación de riesgo
+    Retorna parámetros climáticos aproximados según la zona geográfica de Perú
     """
-    try:
-        # Obtener bosque
-        forest = DatabaseService.get_forest_by_id(forest_id)
-        if not forest:
-            raise HTTPException(status_code=404, detail="Bosque no encontrado")
-        
-        # Obtener datos históricos
-        historical = earth_engine_service.get_ndvi_history(
-            lat=forest['latitude'],
-            lon=forest['longitude'],
-            months=12
-        )
-        
-        if len(historical) < 3:
-            raise HTTPException(
-                status_code=400, 
-                detail="Datos históricos insuficientes para predicción"
-            )
-        
-        # Generar predicción
-        prediction = predictor_service.predict_forest_health(
-            historical_data=historical,
-            days_ahead=days_ahead
-        )
-        
+    
+    # Amazonía (húmedo, viento suave)
+    if longitude < -73 and latitude > -10 and latitude < -2:
         return {
-            'forest_id': forest_id,
-            'forest_name': forest['name'],
-            'days_ahead': days_ahead,
-            **prediction
+            'wind_speed': round(8 + random.uniform(0, 4), 1),  # 8-12 km/h
+            'humidity': round(65 + random.uniform(0, 15)),     # 65-80%
+            'wind_direction': round(90 + random.uniform(0, 45)), # Este-Sureste
+            'region': 'Amazonía'
         }
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.get("/analyze/point/prediction")
-def predict_point_future(
-    lat: float = Query(..., ge=-90, le=90, description="Latitud"),
-    lon: float = Query(..., ge=-180, le=180, description="Longitud"),
-    days_ahead: int = Query(default=90, ge=1, le=365, description="Días a predecir")
-):
-    """
-    Predecir salud futura de cualquier punto del mapa
     
-    Args:
-        lat: Latitud
-        lon: Longitud
-        days_ahead: Días hacia adelante
-    
-    Returns:
-        Predicciones ML del punto seleccionado
-    """
-    try:
-        # Obtener histórico
-        historical = earth_engine_service.get_ndvi_history(
-            lat=lat,
-            lon=lon,
-            months=12
-        )
-        
-        if len(historical) < 3:
-            raise HTTPException(
-                status_code=400,
-                detail="Datos históricos insuficientes para predicción"
-            )
-        
-        # Predicción
-        prediction = predictor_service.predict_forest_health(
-            historical_data=historical,
-            days_ahead=days_ahead
-        )
-        
+    # Costa norte (seco, viento fuerte)
+    elif longitude > -81 and longitude < -79 and latitude > -8:
         return {
-            'location': {'latitude': lat, 'longitude': lon},
-            'days_ahead': days_ahead,
-            **prediction
+            'wind_speed': round(20 + random.uniform(0, 10), 1), # 20-30 km/h
+            'humidity': round(15 + random.uniform(0, 15)),      # 15-30%
+            'wind_direction': round(180 + random.uniform(0, 30)), # Sur
+            'region': 'Costa Norte'
         }
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-class FireImpactRequest(BaseModel):
-    fire_area_ha: float
-    scenarios: List[int] = [1, 2, 7]
-
-@router.post("/simulate-impact")
-def simulate_fire_impact(request: FireImpactRequest):
-    """
-    Simular impacto de incendio en diferentes escenarios temporales
     
-    Body:
-        - fire_area_ha: Área actual del incendio en hectáreas
-        - scenarios: Lista de días para simular (ej: [1, 2, 7])
-    
-    Returns:
-        Simulaciones de impacto ambiental, social y recomendaciones
-    """
-    try:
-        if request.fire_area_ha <= 0:
-            raise HTTPException(
-                status_code=400,
-                detail="El área del incendio debe ser mayor a 0"
-            )
-        
-        simulation = predictor_service.simulate_fire_impact(
-            fire_area_ha=request.fire_area_ha,
-            scenarios=request.scenarios
-        )
-        
+    # Costa sur (muy seco, viento moderado)
+    elif longitude > -77 and latitude < -12:
         return {
-            'initial_fire_area_ha': request.fire_area_ha,
-            **simulation
+            'wind_speed': round(15 + random.uniform(0, 8), 1),  # 15-23 km/h
+            'humidity': round(10 + random.uniform(0, 20)),      # 10-30%
+            'wind_direction': round(200 + random.uniform(0, 40)), # Sur-Suroeste
+            'region': 'Costa Sur'
         }
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
     
-# Agregar este import al inicio del archivo
-from services.fire_predictor import fire_predictor
+    # Sierra (seco, viento variable)
+    elif longitude > -78 and longitude < -73 and latitude > -12 and latitude < -6:
+        return {
+            'wind_speed': round(12 + random.uniform(0, 10), 1), # 12-22 km/h
+            'humidity': round(30 + random.uniform(0, 25)),      # 30-55%
+            'wind_direction': round(random.uniform(0, 360)),    # Variable
+            'region': 'Sierra'
+        }
+    
+    # Selva central (húmedo, viento leve)
+    elif longitude < -75 and latitude > -12 and latitude < -8:
+        return {
+            'wind_speed': round(6 + random.uniform(0, 6), 1),   # 6-12 km/h
+            'humidity': round(70 + random.uniform(0, 15)),      # 70-85%
+            'wind_direction': round(45 + random.uniform(0, 90)), # Noreste-Este
+            'region': 'Selva Central'
+        }
+    
+    # Default (condiciones promedio)
+    else:
+        return {
+            'wind_speed': round(12 + random.uniform(0, 8), 1),  # 12-20 km/h
+            'humidity': round(40 + random.uniform(0, 30)),      # 40-70%
+            'wind_direction': round(random.uniform(0, 360)),    # Variable
+            'region': 'Zona mixta'
+        }
 
-# Agregar este endpoint al FINAL del archivo
+
 @router.get("/fire/predict-spread")
 async def predict_fire_spread(
     latitude: float = Query(..., description="Latitud del incendio"),
     longitude: float = Query(..., description="Longitud del incendio"),
     days_ahead: int = Query(3, ge=1, le=7, description="Días a predecir"),
-    wind_speed: float = Query(15, ge=0, le=100, description="Velocidad viento km/h"),
-    humidity: float = Query(30, ge=0, le=100, description="Humedad %"),
-    wind_direction: float = Query(90, ge=0, le=360, description="Dirección viento (grados)")
+    wind_speed: Optional[float] = Query(None, description="Velocidad del viento (km/h) - opcional"),
+    humidity: Optional[float] = Query(None, description="Humedad (%) - opcional"),
+    wind_direction: Optional[float] = Query(None, description="Dirección del viento (grados) - opcional")
 ):
     """
-    Predice propagación de incendio usando modelo físico
-    
-    - **latitude**: Ubicación actual del incendio
-    - **longitude**: Ubicación actual del incendio  
-    - **days_ahead**: Días hacia adelante (1-7)
-    - **wind_speed**: Velocidad del viento en km/h
-    - **humidity**: Humedad relativa (%)
-    - **wind_direction**: Dirección del viento en grados (0=Norte, 90=Este, 180=Sur, 270=Oeste)
+    Predice la propagación de un incendio usando modelo físico.
+    Si no se proporcionan parámetros climáticos, se usan valores aproximados según la ubicación.
     """
     
-    prediction = await fire_predictor.predict_spread(
-        fire_lat=latitude,
-        fire_lon=longitude,
-        days_ahead=days_ahead,
-        wind_speed_kmh=wind_speed,
-        humidity_percent=humidity,
-        wind_direction_deg=wind_direction
-    )
+    # Si no se proporcionan parámetros, usar datos según ubicación
+    if wind_speed is None or humidity is None or wind_direction is None:
+        weather_params = get_weather_params_by_location(latitude, longitude)
+        wind_speed = weather_params['wind_speed']
+        humidity = weather_params['humidity']
+        wind_direction = weather_params['wind_direction']
+        using_location_data = True
+        region = weather_params['region']
+    else:
+        using_location_data = False
+        region = None
     
-    return prediction
+    from datetime import datetime, timedelta
+    import math
+    
+    predictions = []
+    current_lat = latitude
+    current_lon = longitude
+    
+    for day in range(1, days_ahead + 1):
+        # Velocidad de propagación base (km/h)
+        base_speed = 0.5
+        
+        # Factores de ajuste
+        wind_factor = 1 + (wind_speed / 50)
+        humidity_factor = max(0.3, 1 - (humidity / 150))
+        vegetation_factor = 1.2  # Amazonía alta densidad
+        
+        # Velocidad final
+        spread_speed = base_speed * wind_factor * humidity_factor * vegetation_factor
+        
+        # Distancia recorrida en 24 horas
+        distance_km = spread_speed * 24
+        
+        # Nueva posición (simplificado, asume dirección del viento)
+        wind_rad = math.radians(wind_direction)
+        delta_lat = (distance_km / 111) * math.cos(wind_rad)
+        delta_lon = (distance_km / (111 * math.cos(math.radians(current_lat)))) * math.sin(wind_rad)
+        
+        current_lat += delta_lat
+        current_lon += delta_lon
+        
+        # Radio de propagación acumulado
+        spread_radius_km = distance_km * day
+        
+        # Área afectada (circular)
+        affected_area_ha = math.pi * (spread_radius_km ** 2) * 100
+        
+        # Impacto ambiental
+        co2_tonnes = affected_area_ha * 120
+        cars_equivalent = co2_tonnes / 4.6
+        species_at_risk = int(affected_area_ha * 0.5)
+        water_sources = max(1, int(spread_radius_km / 3))
+        
+        # Impacto poblacional (densidad Amazonía: ~5 personas/km²)
+        area_km2 = math.pi * (spread_radius_km ** 2)
+        people_at_risk = int(area_km2 * 5)
+        indirect_impact = people_at_risk * 3
+        families_affected = int(people_at_risk / 4.5)
+        
+        severity = "BAJA" if people_at_risk < 100 else "MODERADA" if people_at_risk < 500 else "ALTA"
+        
+        predictions.append({
+            "day": day,
+            "date": (datetime.now() + timedelta(days=day)).isoformat(),
+            "fire_front": {
+                "latitude": round(current_lat, 5),
+                "longitude": round(current_lon, 5)
+            },
+            "spread_radius_km": round(spread_radius_km, 2),
+            "affected_area_ha": round(affected_area_ha, 2),
+            "environmental_impact": {
+                "co2_tonnes": round(co2_tonnes, 2),
+                "cars_equivalent": round(cars_equivalent, 1),
+                "species_at_risk": species_at_risk,
+                "water_sources_at_risk": water_sources
+            },
+            "population_impact": {
+                "people_at_risk": people_at_risk,
+                "indirect_impact": indirect_impact,
+                "families_affected": families_affected,
+                "severity": severity
+            },
+            "confidence": "ALTA" if day <= 3 else "MEDIA"
+        })
+    
+    response = {
+        "origin": {
+            "latitude": latitude,
+            "longitude": longitude
+        },
+        "predictions": predictions,
+        "model": "Fire Spread Physical Model v1.0 - Location-based",
+        "parameters": {
+            "wind_speed_kmh": wind_speed,
+            "wind_direction": wind_direction,
+            "humidity_percent": humidity,
+            "days_predicted": days_ahead,
+            "using_location_data": using_location_data
+        },
+        "total_impact": {
+            "max_area_ha": round(predictions[-1]["affected_area_ha"], 2),
+            "max_radius_km": round(predictions[-1]["spread_radius_km"], 2)
+        }
+    }
+    
+    if using_location_data:
+        response["location_info"] = {
+            "region": region,
+            "estimated_climate": f"Viento {wind_speed}km/h, Humedad {humidity}%, Dirección {wind_direction}°"
+        }
+    
+    return response
