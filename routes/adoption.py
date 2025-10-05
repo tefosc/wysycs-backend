@@ -17,6 +17,21 @@ class AdoptionRequest(BaseModel):
 def adopt_forest(request: AdoptionRequest):
     """Adoptar un bosque"""
     try:
+        # ✅ VALIDACIÓN: Verificar si ya adoptó este bosque
+        existing_adoption = supabase.table('adopted_forests') \
+            .select('id') \
+            .eq('forest_id', request.forest_id) \
+            .eq('guardian_email', request.guardian_email) \
+            .eq('is_active', True) \
+            .execute()
+        
+        if existing_adoption.data:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"You have already adopted this forest"
+            )
+        
+        # Proceder con la adopción
         adoption = DatabaseService.adopt_forest(
             forest_id=request.forest_id,
             guardian_name=request.guardian_name,
@@ -61,6 +76,8 @@ def adopt_forest(request: AdoptionRequest):
         }   
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+    except HTTPException:
+        raise  # Re-lanzar HTTPException para que FastAPI la maneje
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
