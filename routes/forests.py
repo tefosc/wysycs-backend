@@ -8,13 +8,11 @@ router = APIRouter(prefix="/api/v1", tags=["Forests"])
 
 @router.get("/forests", response_model=List[Dict])
 @router.get("/forests", response_model=List[Dict])
+
+@router.get("/forests", response_model=List[Dict])
 def get_all_forests():
     """
     Obtener todos los bosques con salud en tiempo real desde NASA
-    
-    Incluye:
-    - Información básica de cada bosque (Supabase)
-    - Salud actual NDVI (Google Earth Engine - NASA MODIS)
     """
     # Obtener todos los bosques de la BD
     forests = DatabaseService.get_all_forests()
@@ -41,7 +39,6 @@ def get_all_forests():
             }
             
         except Exception as e:
-            # Si falla GEE para este bosque, usar fallback
             print(f"⚠️ Error obteniendo salud NASA para bosque {forest.get('id')}: {str(e)}")
             forest['health_nasa'] = {
                 "ndvi_value": None,

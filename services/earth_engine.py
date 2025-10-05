@@ -51,28 +51,38 @@ class EarthEngineService:
             # Punto de interés
             point = ee.Geometry.Point([lon, lat])
             
-            # Obtener imagen MODIS más reciente (últimos 30 días)
+            # Obtener imagen MODIS más reciente (últimos 60 días - más rango)
             end_date = datetime.now()
-            start_date = end_date - timedelta(days=30)
+            start_date = end_date - timedelta(days=60)  # Aumentado de 30 a 60
             
             modis = ee.ImageCollection('MODIS/061/MOD13Q1') \
                 .filterDate(start_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d')) \
                 .filterBounds(point) \
                 .select('NDVI') \
-                .first()
+                .sort('system:time_start', False)  # Ordenar por fecha descendente
+            
+            # Verificar que hay imágenes
+            count = modis.size().getInfo()
+            if count == 0:
+                print(f"⚠️ No hay imágenes MODIS para punto ({lat}, {lon})")
+                return self._get_fallback_health(lat, lon)
+            
+            # Obtener primera imagen
+            first_image = modis.first()
             
             # Obtener valor NDVI en el punto
-            ndvi_raw = modis.sample(point, 250).first().get('NDVI').getInfo()
+            sample = first_image.sample(point, 250).first()
+            
+            if sample is None:
+                print(f"⚠️ Sample devolvió None para punto ({lat}, {lon})")
+                return self._get_fallback_health(lat, lon)
+            
+            ndvi_raw = sample.get('NDVI').getInfo()
             
             # MODIS NDVI viene en escala -2000 a 10000, convertir a -1 a 1
             ndvi_value = ndvi_raw / 10000.0
             
             # Calcular porcentaje de salud (0-100)
-            # NDVI > 0.6 = Excelente (100%)
-            # NDVI 0.4-0.6 = Bueno (70-90%)
-            # NDVI 0.2-0.4 = Regular (40-70%)
-            # NDVI < 0.2 = Crítico (0-40%)
-            
             if ndvi_value > 0.6:
                 health_percentage = int(90 + (ndvi_value - 0.6) * 25)
             elif ndvi_value > 0.4:
@@ -107,7 +117,7 @@ class EarthEngineService:
             }
             
         except Exception as e:
-            print(f"Error obteniendo NDVI: {e}")
+            print(f"Error obteniendo NDVI para ({lat}, {lon}): {e}")
             return self._get_fallback_health(lat, lon)
     
     def _get_fallback_health(self, lat: float, lon: float) -> Dict:
@@ -137,7 +147,7 @@ class EarthEngineService:
             "health_percentage": health,
             "status": status,
             "color": color,
-            "source": "Estimación (GEE no disponible)",
+            "source": "Estimation (GEE unavailable)",
             "is_real_data": False,
             "last_update": datetime.now().isoformat()
         }
