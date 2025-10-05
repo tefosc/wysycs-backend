@@ -76,11 +76,14 @@ def get_leaderboard(limit: int = 10):
         )[:limit]
         
         # Agregar ranking y emoji
+        # Agregar ranking, recalcular nivel y emoji
         for idx, guardian in enumerate(leaderboard, 1):
             guardian['rank'] = idx
+            # ✅ RECALCULAR nivel basado en puntos totales
+            guardian['guardian_level'] = calculate_level(guardian['total_points'])
             level_config = LEVELS.get(guardian['guardian_level'], LEVELS['Seedling'])
             guardian['level_emoji'] = level_config['emoji']
-        
+                
         return {
             "leaderboard": leaderboard,
             "total_guardians": len(guardians)
