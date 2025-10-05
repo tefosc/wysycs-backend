@@ -37,7 +37,7 @@ class DatabaseService:
         try:
             forest = DatabaseService.get_forest_by_id(forest_id)
             if not forest:
-                raise ValueError(f"Bosque {forest_id} no encontrado")
+                raise ValueError(f"Forest {forest_id} not found")
             
             data = {
                 'forest_id': forest_id,

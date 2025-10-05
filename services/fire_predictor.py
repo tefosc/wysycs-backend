@@ -98,7 +98,7 @@ class FirePropagationPredictor:
             'people_at_risk': direct_impact,
             'indirect_impact': indirect_impact,
             'families_affected': families_affected,
-            'severity': 'CRÍTICA' if direct_impact > 1000 else 'ALTA' if direct_impact > 500 else 'MODERADA'
+            'severity': 'CRITICAL' if direct_impact > 1000 else 'HIGH' if direct_impact > 500 else 'MODERATE'
         }
     
     @staticmethod
@@ -150,7 +150,7 @@ class FirePropagationPredictor:
                 'affected_area_ha': round(affected_area_ha, 2),
                 'environmental_impact': env_impact,
                 'population_impact': pop_impact,
-                'confidence': 'ALTA' if day <= 2 else 'MEDIA' if day <= 5 else 'BAJA'
+                'confidence': 'HIGH' if day <= 2 else 'MEDIUM' if day <= 5 else 'LOW'
             })
             
             # Actualizar posición para siguiente iteración

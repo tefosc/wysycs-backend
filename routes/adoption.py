@@ -26,7 +26,7 @@ def adopt_forest(request: AdoptionRequest):
         
         # Asignar puntos iniciales por adopción
         initial_points = 10
-        new_level = "Sembrador"
+        new_level = "Seedling"
         
         # Actualizar adopción con puntos
         supabase.table('adopted_forests') \
@@ -53,7 +53,7 @@ def adopt_forest(request: AdoptionRequest):
         
         return {
             "success": True,
-            "message": "¡Bosque adoptado exitosamente!",
+            "message": "Forest adopted successfully!",
             "adoption_id": adoption['id'],
             "email_sent": True,
             "points_earned": initial_points,
@@ -76,7 +76,7 @@ def get_guardian_info(email: str):
             "adopted_forests": [],
             "total_forests": 0,
             "total_points": 0,
-            "guardian_level": "Sembrador"
+            "guardian_level": "Seedling"
         }
     
     # Agregar salud NASA a cada bosque adoptado
@@ -104,7 +104,7 @@ def get_guardian_info(email: str):
             forest['health_nasa'] = {
                 'ndvi_value': None,
                 'health_percentage': forest.get('health', 50),
-                'status': 'Datos no disponibles',
+                'status': 'Data not available',
                 'color': '#6b7280',
                 'is_real_data': False
             }
@@ -120,5 +120,5 @@ def get_guardian_info(email: str):
         "adopted_forests": forests_with_nasa,
         "total_forests": len(forests_with_nasa),
         "total_points": total_points,
-        "guardian_level": forests_with_nasa[0].get('guardian_level', 'Sembrador')
+        "guardian_level": forests_with_nasa[0].get('guardian_level', 'Seedling')
     }

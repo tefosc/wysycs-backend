@@ -138,7 +138,7 @@ async def predict_fire_spread(
         indirect_impact = people_at_risk * 3
         families_affected = int(people_at_risk / 4.5)
         
-        severity = "BAJA" if people_at_risk < 100 else "MODERADA" if people_at_risk < 500 else "ALTA"
+        severity = "LOW" if people_at_risk < 100 else "MODERATE" if people_at_risk < 500 else "HIGH"
         
         predictions.append({
             "day": day,
@@ -161,7 +161,7 @@ async def predict_fire_spread(
                 "families_affected": families_affected,
                 "severity": severity
             },
-            "confidence": "ALTA" if day <= 3 else "MEDIA"
+            "confidence": "HIGH" if day <= 3 else "MEDIUM"
         })
     
     response = {

@@ -68,20 +68,20 @@ class PredictorService:
             
             if change_percentage < -10:
                 trend = "declining"
-                risk_level = "ALTO"
-                message = f"⚠️ El bosque perderá {abs(int(change_percentage))}% de salud en {days_ahead} días"
+                risk_level = "HIGH"
+                message = f"⚠️ Forest will lose {abs(int(change_percentage))}% of health in {days_ahead} days"
             elif change_percentage < -5:
                 trend = "slightly_declining"
-                risk_level = "MODERADO"
-                message = f"⚠️ Ligera disminución de {abs(int(change_percentage))}% esperada"
+                risk_level = "MODERATE"
+                message = f"⚠️ Slight decrease of {abs(int(change_percentage))}% expected"
             elif change_percentage > 5:
                 trend = "improving"
-                risk_level = "BAJO"
-                message = f"✅ El bosque mejorará {int(change_percentage)}% en {days_ahead} días"
+                risk_level = "LOW"
+                message = f"✅ Forest will improve {int(change_percentage)}% in {days_ahead} days"
             else:
                 trend = "stable"
-                risk_level = "BAJO"
-                message = f"✅ El bosque se mantendrá estable"
+                risk_level = "LOW"
+                message = f"✅ Forest will remain stable"
             
             return {
                 'predictions': predictions[:30],  # Máximo 30 días
@@ -106,8 +106,8 @@ class PredictorService:
             'predictions': [],
             'trend': 'stable',
             'risk_assessment': {
-                'level': 'DESCONOCIDO',
-                'message': 'No hay suficientes datos históricos para predicción',
+                'level': 'UNKNOWN',
+                'message': 'Not enough historical data for prediction',
                 'change_percentage': 0
             },
             'current_ndvi': 0,
@@ -138,13 +138,13 @@ class PredictorService:
             aqi = min(500, int(base_aqi))
             
             if aqi > 300:
-                aqi_category = "Peligroso"
+                aqi_category = "Hazardous"
             elif aqi > 200:
-                aqi_category = "Muy Insalubre"
+                aqi_category = "Very Unhealthy"
             elif aqi > 150:
-                aqi_category = "Insalubre"
+                aqi_category = "Unhealthy"
             else:
-                aqi_category = "Insalubre para grupos sensibles"
+                aqi_category = "Unhealthy for Sensitive Groups"
             
             # Emisiones CO2
             co2_tonnes = total_area * 80
@@ -154,11 +154,11 @@ class PredictorService:
             affected_population = int(total_area * 25)
             
             if affected_population > 5000:
-                severity = "Crítica"
+                severity = "Critical"
             elif affected_population > 2000:
-                severity = "Grave"
+                severity = "Severe"
             else:
-                severity = "Moderada"
+                severity = "Moderate"
             
             # Recursos hídricos
             families_without_water = int(affected_population / 5)
@@ -200,18 +200,18 @@ class PredictorService:
         recommendations = []
         
         if worst_scenario['air_quality']['aqi'] > 200:
-            recommendations.append("🚨 Evacuación inmediata de comunidades cercanas")
-        
+            recommendations.append("🚨 Immediate evacuation of nearby communities")
+
         if worst_scenario['population']['affected'] > 2000:
-            recommendations.append("🏥 Activar centros de salud de emergencia")
-        
+            recommendations.append("🏥 Activate emergency health centers")
+
         if worst_scenario['fire']['total_area_ha'] > 200:
-            recommendations.append("🚁 Solicitar apoyo aéreo para combate de incendios")
-        
+            recommendations.append("🚁 Request aerial support for firefighting")
+
         if worst_scenario['water']['families_without_water'] > 500:
-            recommendations.append("💧 Distribuir agua potable de emergencia")
-        
-        recommendations.append("📢 Informar a autoridades ambientales (SERNANP/MINAM)")
+            recommendations.append("💧 Distribute emergency drinking water")
+
+        recommendations.append("📢 Inform environmental authorities (SERNANP/MINAM)")
         
         return {
             'scenarios': results,

@@ -105,7 +105,7 @@ def check_fires_and_alert():
                             'forest_id': adoption['forest_id'],
                             'guardian_email': guardian_email,
                             'alert_type': 'fire',
-                            'severity': 'CRÍTICO' if distance < 10 else 'ALTO',
+                            'severity': 'CRITICAL' if distance < 10 else 'HIGH',
                             'alert_data': {
                                 'distance_km': distance,
                                 'fire_confidence': fire.get('confidence'),

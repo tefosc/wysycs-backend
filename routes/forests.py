@@ -19,7 +19,7 @@ def get_all_forests():
     # Obtener todos los bosques de la BD
     forests = DatabaseService.get_all_forests()
     if not forests:
-        raise HTTPException(status_code=404, detail="No hay bosques")
+        raise HTTPException(status_code=404, detail="No forests found")
     
     # Agregar health_nasa a cada bosque
     for forest in forests:
@@ -46,9 +46,9 @@ def get_all_forests():
             forest['health_nasa'] = {
                 "ndvi_value": None,
                 "health_percentage": forest.get('health', 50),
-                "status": "Datos NASA no disponibles",
+                "status": "NASA data not available",
                 "color": "#6b7280",
-                "source": "Base de datos local",
+                "source": "Local database",
                 "is_real_data": False,
                 "last_update": datetime.utcnow().isoformat()
             }
@@ -67,7 +67,7 @@ def get_forest_by_id(forest_id: str):
     # Obtener datos básicos del bosque
     forest = DatabaseService.get_forest_by_id(forest_id)
     if not forest:
-        raise HTTPException(status_code=404, detail=f"Bosque {forest_id} no encontrado")
+        raise HTTPException(status_code=404, detail=f"Forest {forest_id} not found")
     
     # Obtener salud en tiempo real desde NASA
     try:
@@ -98,9 +98,9 @@ def get_forest_by_id(forest_id: str):
         forest['health_nasa'] = {
             "ndvi_value": None,
             "health_percentage": forest.get('health', 50),  # Fallback al valor BD
-            "status": "Datos NASA no disponibles",
+            "status": "NASA data not available",
             "color": "#6b7280",
-            "source": "Base de datos local",
+            "source": "Local database",
             "is_real_data": False,
             "last_update": datetime.utcnow().isoformat()
         }

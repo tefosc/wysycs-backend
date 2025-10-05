@@ -59,15 +59,15 @@ async def get_fires_near_forest(
     )
     
     # Calcular nivel de riesgo
-    risk_level = "BAJO"
+    risk_level = "LOW"
     if len(nearby_fires) > 0:
         closest_distance = nearby_fires[0]['distance_km']
         if closest_distance < 5:
-            risk_level = "CRÍTICO"
+            risk_level = "CRITICAL"
         elif closest_distance < 10:
-            risk_level = "ALTO"
+            risk_level = "HIGH"
         elif closest_distance < 20:
-            risk_level = "MODERADO"
+            risk_level = "MODERATE"
     
     return {
         "success": True,
@@ -156,29 +156,29 @@ async def analyze_location(
     )
     
     # Calcular nivel de riesgo
-    risk_level = "BAJO"
+    risk_level = "LOW"
     risk_color = "#10b981"  # Verde
-    risk_description = "No se detectaron incendios en el área"
-    
+    risk_description = "No fires detected in the area"
+
     if len(nearby_fires) > 0:
         closest_distance = nearby_fires[0]['distance_km']
-        
+
         if closest_distance < 5:
-            risk_level = "CRÍTICO"
+            risk_level = "CRITICAL"
             risk_color = "#ef4444"  # Rojo
-            risk_description = f"¡PELIGRO! Incendio a solo {closest_distance}km"
+            risk_description = f"DANGER! Fire only {closest_distance}km away"
         elif closest_distance < 10:
-            risk_level = "ALTO"
+            risk_level = "HIGH"
             risk_color = "#f97316"  # Naranja
-            risk_description = f"Riesgo alto. Incendio cercano a {closest_distance}km"
+            risk_description = f"High risk. Nearby fire at {closest_distance}km"
         elif closest_distance < 20:
-            risk_level = "MODERADO"
+            risk_level = "MODERATE"
             risk_color = "#fbbf24"  # Amarillo
-            risk_description = f"Vigilar. Incendio detectado a {closest_distance}km"
+            risk_description = f"Monitor. Fire detected at {closest_distance}km"
         else:
-            risk_level = "BAJO"
+            risk_level = "LOW"
             risk_color = "#10b981"  # Verde
-            risk_description = f"Incendio lejano ({closest_distance}km). Área segura"
+            risk_description = f"Distant fire ({closest_distance}km). Safe area"
     
     # Estadísticas adicionales
     high_confidence_fires = len([f for f in nearby_fires if f['confidence'] in ['high', 'h']])
@@ -208,32 +208,32 @@ async def analyze_location(
 
 def _generate_recommendations(risk_level: str, fire_count: int) -> List[str]:
     """Genera recomendaciones según el nivel de riesgo"""
-    
-    if risk_level == "CRÍTICO":
+
+    if risk_level == "CRITICAL":
         return [
-            "🚨 Alertar a autoridades locales inmediatamente",
-            "👥 Preparar evacuación preventiva de comunidades",
-            "💧 Verificar acceso a fuentes de agua",
-            "📞 Contactar con bomberos y defensa civil"
+            "🚨 Alert local authorities immediately",
+            "👥 Prepare preventive evacuation of communities",
+            "💧 Verify access to water sources",
+            "📞 Contact firefighters and civil defense"
         ]
-    elif risk_level == "ALTO":
+    elif risk_level == "HIGH":
         return [
-            "⚠️ Monitorear constantemente la situación",
-            "👨‍🚒 Informar a brigadas contra incendios",
-            "🎒 Preparar kit de emergencia",
-            "📡 Mantener comunicación con autoridades"
+            "⚠️ Monitor the situation constantly",
+            "👨‍🚒 Inform fire brigades",
+            "🎒 Prepare emergency kit",
+            "📡 Maintain communication with authorities"
         ]
-    elif risk_level == "MODERADO":
+    elif risk_level == "MODERATE":
         return [
-            "👀 Vigilar evolución de los incendios",
-            "🌳 Evitar actividades que puedan generar chispas",
-            "💧 Identificar fuentes de agua cercanas",
-            "📱 Adoptar este bosque para recibir alertas automáticas"
+            "👀 Monitor fire evolution",
+            "🌳 Avoid activities that may generate sparks",
+            "💧 Identify nearby water sources",
+            "📱 Adopt this forest to receive automatic alerts"
         ]
-    else:  # BAJO
+    else:  # LOW
         return [
-            "✅ Área actualmente segura",
-            "🌳 Considera adoptar este bosque para monitoreo continuo",
-            "📊 Revisar predicciones de riesgo futuro",
-            "🤝 Unirte a la comunidad de guardianes"
+            "✅ Currently safe area",
+            "🌳 Consider adopting this forest for continuous monitoring",
+            "📊 Review future risk predictions",
+            "🤝 Join the guardian community"
         ]

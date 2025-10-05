@@ -84,16 +84,16 @@ class EarthEngineService:
             
             # Determinar estado y color
             if health_percentage >= 70:
-                status = "Saludable"
+                status = "Healthy"
                 color = "#10b981"  # Verde
             elif health_percentage >= 50:
-                status = "En riesgo"
+                status = "At Risk"
                 color = "#f59e0b"  # Amarillo
             elif health_percentage >= 30:
-                status = "Deteriorado"
+                status = "Deteriorated"
                 color = "#f97316"  # Naranja
             else:
-                status = "Crítico"
+                status = "Critical"
                 color = "#ef4444"  # Rojo
             
             return {
@@ -123,13 +123,13 @@ class EarthEngineService:
         health = base_health + variation
         
         if health >= 70:
-            status = "Saludable"
+            status = "Healthy"
             color = "#10b981"
         elif health >= 50:
-            status = "En riesgo"
+            status = "At Risk"
             color = "#f59e0b"
         else:
-            status = "Deteriorado"
+            status = "Deteriorated"
             color = "#f97316"
         
         return {

@@ -37,7 +37,7 @@ app.include_router(gamification.router)
 @app.get("/")
 def root():
     return {
-        "message": "🌳 WYSYCS API funcionando",
+        "message": "🌳 WYSYCS API running",
         "version": "1.0.0",
         "endpoints": {
             "forests": "/api/v1/forests",
@@ -58,7 +58,7 @@ async def cron_check_fires():
         check_fires_and_alert()
         return {
             "success": True,
-            "message": "Verificación de incendios completada",
+            "message": "Fire check completed",
             "timestamp": datetime.now().isoformat()
         }
     except Exception as e:

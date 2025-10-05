@@ -7,10 +7,10 @@ router = APIRouter(prefix="/api/v1", tags=["Gamification"])
 
 # Sistema de niveles
 LEVELS = {
-    "Sembrador": {"min_points": 0, "max_points": 50, "emoji": "🌱"},
+    "Seedling": {"min_points": 0, "max_points": 50, "emoji": "🌱"},
     "Protector": {"min_points": 51, "max_points": 150, "emoji": "🌳"},
-    "Guardián": {"min_points": 151, "max_points": 300, "emoji": "🦅"},
-    "Líder Ancestral": {"min_points": 301, "max_points": 999999, "emoji": "🏆"}
+    "Guardian": {"min_points": 151, "max_points": 300, "emoji": "🦅"},
+    "Ancestral Leader": {"min_points": 301, "max_points": 999999, "emoji": "🏆"}
 }
 
 def calculate_level(points: int) -> str:
@@ -18,7 +18,7 @@ def calculate_level(points: int) -> str:
     for level, config in LEVELS.items():
         if config["min_points"] <= points <= config["max_points"]:
             return level
-    return "Sembrador"
+    return "Seedling"
 
 def calculate_points_for_adoption() -> int:
     """Puntos por adoptar un bosque"""
@@ -61,7 +61,7 @@ def get_leaderboard(limit: int = 10):
                     'guardian_name': adoption['guardian_name'],
                     'guardian_email': email,
                     'total_points': 0,
-                    'guardian_level': adoption.get('guardian_level', 'Sembrador'),
+                    'guardian_level': adoption.get('guardian_level', 'Seedling'),
                     'forests_count': 0
                 }
             # SUMAR los puntos de cada adopción
@@ -78,7 +78,7 @@ def get_leaderboard(limit: int = 10):
         # Agregar ranking y emoji
         for idx, guardian in enumerate(leaderboard, 1):
             guardian['rank'] = idx
-            level_config = LEVELS.get(guardian['guardian_level'], LEVELS['Sembrador'])
+            level_config = LEVELS.get(guardian['guardian_level'], LEVELS['Seedling'])
             guardian['level_emoji'] = level_config['emoji']
         
         return {
@@ -120,10 +120,10 @@ def get_global_stats():
         
         # Distribución por nivel
         level_distribution = {
-            "Sembrador": 0,
+            "Seedling": 0,
             "Protector": 0,
-            "Guardián": 0,
-            "Líder Ancestral": 0
+            "Guardian": 0,
+            "Ancestral Leader": 0
         }
         
         if guardians.data:
@@ -135,7 +135,7 @@ def get_global_stats():
                     .execute()
                 
                 if result.data:
-                    level = result.data[0].get('guardian_level', 'Sembrador')
+                    level = result.data[0].get('guardian_level', 'Seedling')
                     if level in level_distribution:
                         level_distribution[level] += 1
         
@@ -190,16 +190,16 @@ def update_guardian_points(email: str, points_to_add: int):
             .eq('guardian_email', email) \
             .execute()
         
-        level_config = LEVELS.get(new_level, LEVELS['Sembrador'])
+        level_config = LEVELS.get(new_level, LEVELS['Seedling'])
         
         return {
             "guardian_email": email,
             "points_added": points_to_add,
             "total_points": new_points,
-            "previous_level": result.data[0].get('guardian_level', 'Sembrador'),
+            "previous_level": result.data[0].get('guardian_level', 'Seedling'),
             "current_level": new_level,
             "level_emoji": level_config['emoji'],
-            "message": f"¡Nuevo nivel alcanzado: {level_config['emoji']} {new_level}!" if new_level != result.data[0].get('guardian_level') else "Puntos actualizados"
+            "message": f"New level reached: {level_config['emoji']} {new_level}!" if new_level != result.data[0].get('guardian_level') else "Points updated"
         }
         
     except HTTPException:
@@ -233,7 +233,7 @@ def get_guardian_progress(email: str):
         
         guardian = result.data[0]
         current_points = guardian.get('points', 0)
-        current_level = guardian.get('guardian_level', 'Sembrador')
+        current_level = guardian.get('guardian_level', 'Seedling')
         
         # Encontrar siguiente nivel
         levels_list = list(LEVELS.items())
@@ -244,7 +244,7 @@ def get_guardian_progress(email: str):
             points_needed = next_level_config['min_points'] - current_points
             progress_percentage = int((current_points / next_level_config['min_points']) * 100)
         else:
-            next_level_name = "Máximo nivel alcanzado"
+            next_level_name = "Maximum level reached"
             points_needed = 0
             progress_percentage = 100
         
