@@ -83,11 +83,16 @@ def get_guardian_info(email: str):
     forests_with_nasa = []
     for forest in forests:
         try:
+            # ✅ FIX: Acceder a lat/lon desde el objeto 'forests' anidado
+            forest_data = forest.get('forests', {})
+            lat = forest_data.get('latitude')
+            lon = forest_data.get('longitude')
+            
+            if lat is None or lon is None:
+                raise ValueError("Missing coordinates")
+            
             # Obtener salud NASA en tiempo real
-            health_data = earth_engine_service.get_forest_ndvi(
-                lat=forest['latitude'],
-                lon=forest['longitude']
-            )
+            health_data = earth_engine_service.get_forest_ndvi(lat=lat, lon=lon)
             
             # Agregar health_nasa al bosque
             forest['health_nasa'] = {
@@ -103,7 +108,7 @@ def get_guardian_info(email: str):
             # Fallback si falla GEE
             forest['health_nasa'] = {
                 'ndvi_value': None,
-                'health_percentage': forest.get('health', 50),
+                'health_percentage': forest_data.get('health', 50),
                 'status': 'Data not available',
                 'color': '#6b7280',
                 'is_real_data': False
