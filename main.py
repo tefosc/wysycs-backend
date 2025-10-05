@@ -31,7 +31,7 @@ app.include_router(adoption.router)
 app.include_router(fires_router)
 app.include_router(notifications.router, prefix="/api/v1", tags=["Notifications"])
 app.include_router(health.router)
-app.include_router(predictions.router)
+app.include_router(predictions.router, prefix="/api/v1", tags=["Predictions"])
 app.include_router(gamification.router)
 
 @app.get("/")
